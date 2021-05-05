@@ -1,0 +1,10 @@
+---
+title: 'Python '
+author: Taylor Contreras
+date: '2021-05-05'
+slug: python
+categories: []
+tags: []
+description: ''
+---
+I talk about Python here. 
