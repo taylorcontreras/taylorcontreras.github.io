@@ -7,7 +7,7 @@
     <meta name="author" content="Taylor Contreras" />
     
     <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
-    <title>Project 2</title>
+    <title>Project #2</title>
     <meta name="generator" content="Hugo 0.83.1" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="/css/main.css" />
@@ -54,13 +54,13 @@
       <div class="container">
         <div class="blog-post">
           <h3>
-            <strong><a href="/project/project2/">Project 2</a></strong>
+            <strong><a href="/project/project2/">Project #2</a></strong>
           </h3>
         </div>
  
 <div class="blog-title">
           <h4>
-         December 1, 2020 
+         January 1, 0001 
             &nbsp;&nbsp;
             
           </h4>
@@ -72,8 +72,383 @@
               
 
 
-<div id="test-project-2" class="section level2">
-<h2>Test Project 2</h2>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>In this project I will be looking at some Extramarital affairs data. I found this data from the website listing various R datasets: <a href="https://vincentarelbundock.github.io/Rdatasets/datasets.html" class="uri">https://vincentarelbundock.github.io/Rdatasets/datasets.html</a>. My dataset includes the following variables: sex, age, number of years married, if there are children, a scale of how religious they are, education, economic statues according to Hollingshead’s classification, a rating of happiness on the marriage, and the number of affairs in the past year. There are 601 observations in this dataset.</p>
+<pre class="r"><code>library(tidyverse)
+library(ggplot2)
+library(sandwich)
+library(lmtest)
+library(plotROC)
+library(glmnet)
+
+affairs &lt;- read.csv(&quot;https://vincentarelbundock.github.io/Rdatasets/csv/Ecdat/Fair.csv&quot;)
+head(affairs)</code></pre>
+<pre><code>##   X    sex age    ym child religious education occupation rate nbaffairs
+## 1 1   male  37 10.00    no         3        18          7    4         0
+## 2 2 female  27  4.00    no         4        14          6    4         0
+## 3 3 female  32 15.00   yes         1        12          1    4         0
+## 4 4   male  57 15.00   yes         5        18          6    5         0
+## 5 5   male  22  0.75    no         2        17          6    3         0
+## 6 6 female  32  1.50    no         2        17          5    5         0</code></pre>
+<p>First, I will remove some columns. I will be removing the occupation variable because I’m unfamilar with the Hollingshead classification. I will also be removing the first variable, X, as it’s just counting the number of observations.</p>
+<pre class="r"><code>affairs &lt;- affairs %&gt;% select(2:7, 9:10)
+head(affairs)</code></pre>
+<pre><code>##      sex age    ym child religious education rate nbaffairs
+## 1   male  37 10.00    no         3        18    4         0
+## 2 female  27  4.00    no         4        14    4         0
+## 3 female  32 15.00   yes         1        12    4         0
+## 4   male  57 15.00   yes         5        18    5         0
+## 5   male  22  0.75    no         2        17    3         0
+## 6 female  32  1.50    no         2        17    5         0</code></pre>
+</div>
+<div id="manova-testing" class="section level2">
+<h2>MANOVA Testing</h2>
+<p>Now, I will perform MANOVA testing to see if any of my numeric variables show a mean difference across levels of my categorical variable. The effect ofsex (male vs. female) on age, years married, religious rating, years of education, rate of happiness and number of affairs will be looked at.</p>
+<pre class="r"><code>man1 &lt;- manova(cbind(age, ym, religious, education, rate, nbaffairs) ~ sex, data = affairs)
+summary(man1)</code></pre>
+<pre><code>##            Df  Pillai approx F num Df den Df    Pr(&gt;F)    
+## sex         1 0.20188   25.042      6    594 &lt; 2.2e-16 ***
+## Residuals 599                                             
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>The overall MANOVA is significant. Therefore, Univariate ANOVAs will be run to find responses showing the mean difference across the groups.</p>
+<pre class="r"><code>summary.aov(man1)</code></pre>
+<pre><code>##  Response age :
+##              Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## sex           1   1881 1881.48  22.591 2.512e-06 ***
+## Residuals   599  49887   83.28                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response ym :
+##              Df  Sum Sq Mean Sq F value Pr(&gt;F)
+## sex           1    17.1  17.078  0.5498 0.4587
+## Residuals   599 18606.6  31.063               
+## 
+##  Response religious :
+##              Df Sum Sq Mean Sq F value Pr(&gt;F)
+## sex           1   0.05 0.04823  0.0353  0.851
+## Residuals   599 817.80 1.36527               
+## 
+##  Response education :
+##              Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
+## sex           1  547.25  547.25  112.41 &lt; 2.2e-16 ***
+## Residuals   599 2916.12    4.87                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response rate :
+##              Df Sum Sq Mean Sq F value Pr(&gt;F)
+## sex           1   0.04 0.04133  0.0339  0.854
+## Residuals   599 730.16 1.21897               
+## 
+##  Response nbaffairs :
+##              Df Sum Sq Mean Sq F value Pr(&gt;F)
+## sex           1    0.9  0.8993  0.0825  0.774
+## Residuals   599 6528.2 10.8985</code></pre>
+<p>Thus, post hoc tests will be conducted on these variables.</p>
+<pre class="r"><code>pairwise.t.test(affairs$age, affairs$sex, p.adj = &quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  affairs$age and affairs$sex 
+## 
+##      female 
+## male 2.5e-06
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(affairs$education, affairs$sex, p.adj = &quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  affairs$education and affairs$sex 
+## 
+##      female
+## male &lt;2e-16
+## 
+## P value adjustment method: none</code></pre>
+<p>The groups that differ are female and males in both age and years of education. In total, we performed 9 tests (1 MANOVA, 6 ANOVAs and 2 t-tests). The probability of making at least one type I error is 0.3698. The Bonferroni adjusted significance level we should use is 05/9 = 0.0056. Even with this adjusted significance level, our two variables are still significant.</p>
+<p>MANOVA tests require a lot of assumptions/conditions including:</p>
+<ol style="list-style-type: decimal">
+<li><p>Random samples/independent observations</p></li>
+<li><p>Multivariate normality of DV’s (dependent variables)</p></li>
+<li><p>Homogeneity of within-group covariance matrices</p></li>
+<li><p>Linear relationships among DV’s</p></li>
+<li><p>No extreme univariate or multivariate outliers</p></li>
+<li><p>No multicollinearity</p></li>
+</ol>
+<p>The first is the random sample and independent observations/groups condition. If we there are no couples in this dataset, then we can assume that this conditon has been met. With a large sample size, 601 observations, we can also assume this condition #2 is met. Assumptions #3 - #6 require additional graphs and calculations to check.</p>
+<p>It’s difficult to meet every assumption.</p>
+</div>
+<div id="randomization-test" class="section level2">
+<h2>Randomization Test</h2>
+<p>Although our ANOVA stated that the number of affairs did not differ significantly between the genders, I would still like to look at the mean difference.</p>
+<p>Ho: the mean number of affairs is the same for females vs. males.</p>
+<p>Ha: the mean number of affairs is different for females vs. males.</p>
+<pre class="r"><code>females &lt;- affairs$nbaffairs[affairs$sex == &quot;female&quot;]
+males &lt;- affairs$nbaffairs[affairs$sex == &quot;male&quot;]
+num_affairs &lt;- data.frame(gender = c(rep(&quot;females&quot;, 315), rep(&quot;males&quot;, 286)), number_affairs = c(females, males))
+head(num_affairs)</code></pre>
+<pre><code>##    gender number_affairs
+## 1 females              0
+## 2 females              0
+## 3 females              0
+## 4 females              0
+## 5 females              0
+## 6 females              0</code></pre>
+<pre class="r"><code>ggplot(num_affairs, aes(number_affairs, fill = gender)) + geom_histogram(bins = 8) + facet_wrap(~gender, ncol = 2) + xlab(&quot;Number of Affairs&quot;) + ylab(&quot;Count&quot;)</code></pre>
+<p><img src="/project/project2_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>num_affairs %&gt;% group_by(gender) %&gt;% summarize(means = mean(number_affairs)) %&gt;% summarize(&quot;mean_diff&quot; = diff(means))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   mean_diff
+##       &lt;dbl&gt;
+## 1    0.0775</code></pre>
+<pre class="r"><code>rand_dist &lt;- vector()
+for (i in 1:5000){
+  new &lt;- data.frame(number_affairs = sample(num_affairs$number_affairs), gender = num_affairs$gender)
+  rand_dist[i] &lt;- mean(new[new$gender == &quot;females&quot;,]$number_affairs) - mean(new[new$gender == &quot;males&quot;,]$number_affairs)}
+
+mean(rand_dist &gt; .0775 | rand_dist &lt; -.0775)</code></pre>
+<pre><code>## [1] 0.763</code></pre>
+<pre class="r"><code>{hist(rand_dist, main = &quot;&quot;, ylab = &quot;&quot;, col = &quot;light grey&quot;); abline(v = c(-.0775, .0775), col = &quot;red&quot;)}</code></pre>
+<p><img src="/project/project2_files/figure-html/unnamed-chunk-6-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>The mean difference we compute is .0075. This gives us a p-value of .763. We fail to reject our null hypothesis and cannot conlcude that the number of affairs differs between men and women.</p>
+</div>
+<div id="linear-regression" class="section level2">
+<h2>Linear Regression</h2>
+<p>This linear regression will look at the number of years married as a fucntion of age and child.</p>
+<p>First we will mean-center our data.</p>
+<pre class="r"><code>affairs &lt;- affairs %&gt;% mutate(age_c = age - mean(age))</code></pre>
+<p>Next, we will check necessary assumptions and conditions.</p>
+<ol style="list-style-type: decimal">
+<li>Linearity - we need to confirm linearity of numeric predictors.</li>
+</ol>
+<pre class="r"><code>plot(affairs$age, affairs$ym, xlab = &quot;Age (years)&quot;, ylab = &quot;Years Married&quot;, main = &quot;Years Married and Age&quot;, pch = 20, xlim = c(10,60))</code></pre>
+<p><img src="/project/project2_files/figure-html/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>It’s not the strongest linear relationship. However, we can see a somewhat positive trend.</p>
+<ol start="2" style="list-style-type: decimal">
+<li>Normality of Residuals</li>
+</ol>
+<pre class="r"><code>model &lt;- lm(ym ~ age_c + child, data = affairs)
+hist(model$residuals, main = &quot;Model Residuals&quot;, xlab = &quot;Residuals&quot;, col = &quot;light grey&quot;)</code></pre>
+<p><img src="/project/project2_files/figure-html/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Our residuals look normally distributed, thus, this assumption is met.</p>
+<ol start="3" style="list-style-type: decimal">
+<li>Equal Variance</li>
+</ol>
+<pre class="r"><code>plot(model$fitted.values, model$residuals, xlab = &quot;Fitted Values&quot;, ylab = &quot;Residuals&quot;, main = &quot;Residual Plot&quot;, pch = 20)
+abline(h = 0, col = &quot;red&quot;)</code></pre>
+<p><img src="/project/project2_files/figure-html/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Our data violates the equal variance assumption. This is definitely a limitation when reporting our results.</p>
+<p>Now, we will conduct our linear regression with an interaction.</p>
+<p>Ho: There is no interaction between having children and age on the number of years married.</p>
+<p>Ha: There is an interaction between having children and age on the number of years married.</p>
+<pre class="r"><code>model2 &lt;- lm(ym ~ child * age_c, data = affairs)
+summary(model2)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = ym ~ child * age_c, data = affairs)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -9.9629 -2.0133 -0.0259  2.0119 10.0520 
+## 
+## Coefficients:
+##                Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)     5.36552    0.33070  16.225   &lt;2e-16 ***
+## childyes        3.84159    0.36672  10.476   &lt;2e-16 ***
+## age_c           0.36147    0.03623   9.978   &lt;2e-16 ***
+## childyes:age_c  0.03601    0.04000   0.900    0.368    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 3.17 on 597 degrees of freedom
+## Multiple R-squared:  0.6779, Adjusted R-squared:  0.6763 
+## F-statistic: 418.8 on 3 and 597 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code>ggplot(affairs, aes(ym, age_c, color = child)) + geom_smooth(method = &quot;lm&quot;) + geom_point() + xlab(&quot;Years Married&quot;) + ylab(&quot;Age (centered)&quot;)</code></pre>
+<p><img src="/project/project2_files/figure-html/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Interpretaions:</p>
+<p>Intercept: For people with an average age and no children, the predicted years married is 5.366.</p>
+<p>childyes: For people with an average age, those with children have an amount of years married that is 3.842 years greater than those without children.</p>
+<p>age_c: For those without children, for a 1 year increase in age, the years married increases by an average of .3615 years.</p>
+<p>childyes:age_c: The slope of age for those with children is .03601 greater than for those without children.</p>
+<p>Our model accounts for 67.79% of the variability in years married.</p>
+</div>
+<div id="linear-regression-with-robustbootstrapped-ses" class="section level2">
+<h2>Linear Regression with Robust/Bootstrapped SEs</h2>
+<p>Now, we will recompute the regression with robust standard errors.</p>
+<pre class="r"><code>coeftest(model2, vcov = vcovHC(model2))</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##                Estimate Std. Error t value  Pr(&gt;|t|)    
+## (Intercept)    5.365517   0.437086 12.2757 &lt; 2.2e-16 ***
+## childyes       3.841595   0.468030  8.2080 1.391e-15 ***
+## age_c          0.361472   0.047436  7.6202 9.994e-14 ***
+## childyes:age_c 0.036006   0.050314  0.7156    0.4745    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>After using robust standard errors, we don’t see any major changes in our regression model. The coefficients that were significant before are still significant. The interaction coefficient became less significant.</p>
+<p>Now, we will rerun the regression model with bootstrapped standard errors.</p>
+<pre class="r"><code>samp_distn &lt;- replicate(5000, {
+  boot_dat &lt;- sample_frac(affairs, replace = T)
+  fit &lt;- lm(ym ~ child * age_c, data = boot_dat)
+  coef(fit)})
+samp_distn %&gt;% t %&gt;% as.data.frame %&gt;% summarize_all(sd)</code></pre>
+<pre><code>##   (Intercept)  childyes      age_c childyes:age_c
+## 1   0.4334387 0.4616688 0.04737978     0.05003453</code></pre>
+<p>The bootstrapped standard errors are very similar to the robust standard errors, both of which are all greater than the original standard errors.</p>
+</div>
+<div id="logistic-regression-two-variables" class="section level2">
+<h2>Logistic Regression (Two Variables)</h2>
+<p>Next, we will fit a logistic regression predicting having children from age and years married.</p>
+<pre class="r"><code>affairs &lt;- affairs %&gt;% mutate(y = ifelse(child == &quot;yes&quot;, 1, 0))
+model3 &lt;- glm(y ~ age + ym, data = affairs, family = &quot;binomial&quot;)
+exp(coeftest(model3))</code></pre>
+<pre><code>## 
+## z test of coefficients:
+## 
+##             Estimate Std. Error   z value Pr(&gt;|z|)
+## (Intercept)  0.33415    1.78343    0.1504    1.060
+## age          0.99500    1.02459    0.8134    2.308
+## ym           1.43343    1.04315 5033.9807    1.000</code></pre>
+<p>Interpretations:</p>
+<p>age: Holding years married constant, going up one year in age increases the odds of having a child by .995.</p>
+<p>ym: Holding age constant, going up one year in years married increases the odds of having children by 1.433.</p>
+<p>We can create a confusion matrix:</p>
+<pre class="r"><code>probs &lt;- predict(model3, type = &quot;response&quot;)
+table(predict = as.numeric(probs &gt; .5), truth = affairs$y) %&gt;% addmargins</code></pre>
+<pre><code>##        truth
+## predict   0   1 Sum
+##     0   109  31 140
+##     1    62 399 461
+##     Sum 171 430 601</code></pre>
+<pre class="r"><code>class_diag&lt;-function(probs,truth){
+
+tab&lt;-table(factor(probs&gt;.5,levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),truth)
+acc=sum(diag(tab))/sum(tab)
+sens=tab[2,2]/colSums(tab)[2]
+spec=tab[1,1]/colSums(tab)[1]
+ppv=tab[2,2]/rowSums(tab)[2]
+
+if(is.numeric(truth)==FALSE &amp; is.logical(truth)==FALSE) truth&lt;-as.numeric(truth)-1
+
+#CALCULATE EXACT AUC
+ord&lt;-order(probs, decreasing=TRUE)
+probs &lt;- probs[ord]; truth &lt;- truth[ord]
+
+TPR=cumsum(truth)/max(1,sum(truth)) 
+FPR=cumsum(!truth)/max(1,sum(!truth))
+
+dup&lt;-c(probs[-1]&gt;=probs[-length(probs)], FALSE)
+TPR&lt;-c(0,TPR[!dup],1); FPR&lt;-c(0,FPR[!dup],1)
+
+n &lt;- length(TPR)
+auc&lt;- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+
+data.frame(acc,sens,spec,ppv,auc)
+}
+class_diag(probs, affairs$y)</code></pre>
+<pre><code>##         acc     sens      spec       ppv       auc
+## 1 0.8452579 0.927907 0.6374269 0.8655098 0.8705018</code></pre>
+<p>Our senstivity/TPR is .928. Our specificity/TNR is .637. Our precision/PPV is .866. Our model has an accuracy of .845. Our model has a good AUC of .871, meaning it does well to predict new data.</p>
+<p>Using ggplot, we will make a density plot of the log-odds.</p>
+<pre class="r"><code>affairs$logit &lt;- predict(model3)
+ggplot(affairs, aes(logit, fill = child)) + geom_density(alpha = .3)</code></pre>
+<p><img src="/project/project2_files/figure-html/unnamed-chunk-16-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>ROC plot and AUC:</p>
+<pre class="r"><code>affairs &lt;- affairs %&gt;% mutate(prob = predict(model3, type = &quot;response&quot;), prediction = ifelse(prob &gt; .5, 1, 0))
+classify &lt;- affairs %&gt;% transmute(prob, prediction, truth = y)
+ROCplot &lt;- ggplot(classify) + geom_roc(aes(d = truth, m = prob), n.cute = 0)
+ROCplot</code></pre>
+<p><img src="/project/project2_files/figure-html/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>calc_auc(ROCplot)</code></pre>
+<pre><code>##   PANEL group       AUC
+## 1     1    -1 0.8705018</code></pre>
+<p>Our area under the curve (AUC) is the probability that a randomly selected person with a child has a predicted probability than a randomly selected person without a child. Our AUC is .871, which is good!</p>
+</div>
+<div id="logistic-regression-all-variables" class="section level2">
+<h2>Logistic Regression (All Variables)</h2>
+<p>Now, I will run a logistic regression predicting having a child from all the remaining variables.</p>
+<pre class="r"><code>affairs &lt;- read.csv(&quot;https://vincentarelbundock.github.io/Rdatasets/csv/Ecdat/Fair.csv&quot;)
+affairs &lt;- affairs %&gt;% select(2:7, 9:10)
+affairs &lt;- affairs %&gt;% mutate(y = ifelse(child == &quot;yes&quot;, 1, 0))
+affairs &lt;- affairs %&gt;% select(1:3, 5:9)
+model4 &lt;- glm(y ~ ., data = affairs, family = &quot;binomial&quot;)
+probs &lt;- predict(model4, type = &quot;response&quot;)
+class_diag(probs, affairs$y)</code></pre>
+<pre><code>##         acc      sens      spec       ppv       auc
+## 1 0.8302829 0.8906977 0.6783626 0.8744292 0.8814973</code></pre>
+<p>Our senstivity/TPR is .891. Our specificity/TNR is .678. Our precision/PPV is .874. Our model has an accuracy of .830. Our model has a good AUC of .881, meaning it does well to predict new data.</p>
+<p>Next, we will perform a 10-fold CV with the same model.</p>
+<pre class="r"><code>set.seed(123)
+k=10
+
+data1&lt;-affairs[sample(nrow(affairs)),] #put dataset in random order
+folds&lt;-cut(seq(1:nrow(affairs)),breaks=k,labels=F) #create folds
+
+diags&lt;-NULL
+for(i in 1:k){          # FOR EACH OF 10 FOLDS
+train&lt;-data1[folds!=i,] # CREATE TRAINING SET
+test&lt;-data1[folds==i,]  # CREATE TESTING SET
+
+truth&lt;-test$y
+
+fit&lt;- glm(y~., data = train, family = &quot;binomial&quot;)
+probs&lt;- predict(fit, newdata = test, type = &quot;response&quot;)
+
+diags&lt;-rbind(diags,class_diag(probs,truth)) #CV DIAGNOSTICS FOR EACH FOLD
+}
+summarize_all(diags, mean)</code></pre>
+<pre><code>##         acc      sens      spec       ppv       auc
+## 1 0.8286066 0.8922516 0.6698568 0.8695979 0.8684447</code></pre>
+<p>Our senstivity/TPR is .892. Our specificity/TNR is .670. Our precision/PPV is .870. Our model has an accuracy of .823. Our model has a good AUC of .868. Our area under the curve (AUC) is the probability that a randomly selected person with a child has a predicted probability than a randomly selected person without a child. These classification diagnostics are slightly lower than what we originally had, but not by much.</p>
+<p>Next, we will perform a LASSO on the same model.</p>
+<pre class="r"><code>set.seed(123)
+
+y &lt;- as.matrix(affairs$y)
+x &lt;- model.matrix(y ~ ., data = affairs)[,-1]
+x &lt;- scale(x)
+cv &lt;- cv.glmnet(x, y, famile = &quot;binomial&quot;)
+lasso &lt;- glmnet(x, y, family = &quot;binomial&quot;, lambda = cv$lambda.1se)
+coef(lasso)</code></pre>
+<pre><code>## 8 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                   s0
+## (Intercept) 1.156394
+## sexmale     .       
+## age         .       
+## ym          1.049859
+## religious   .       
+## education   .       
+## rate        .       
+## nbaffairs   .</code></pre>
+<p>The only coefficient that is non-zero is the years married coefficient. Therefore, we will perform a 10-fold CV with this variable alone.</p>
+<pre class="r"><code>set.seed(123)
+k=10
+
+data1&lt;-affairs[sample(nrow(affairs)),] #put dataset in random order
+folds&lt;-cut(seq(1:nrow(affairs)),breaks=k,labels=F) #create folds
+
+diags&lt;-NULL
+for(i in 1:k){          # FOR EACH OF 10 FOLDS
+train&lt;-data1[folds!=i,] # CREATE TRAINING SET
+test&lt;-data1[folds==i,]  # CREATE TESTING SET
+
+truth&lt;-test$y
+
+fit&lt;- glm(y~ym, data = train, family = &quot;binomial&quot;)
+probs&lt;- predict(fit, newdata = test, type = &quot;response&quot;)
+
+diags&lt;-rbind(diags,class_diag(probs,truth)) #CV DIAGNOSTICS FOR EACH FOLD
+}
+summarize_all(diags, mean)</code></pre>
+<pre><code>##         acc      sens      spec       ppv       auc
+## 1 0.8452186 0.9261743 0.6320872 0.8650036 0.8659585</code></pre>
+<p>Our senstivity/TPR is .926. Our specificity/TNR is .632. Our precision/PPV is .865. Our model has an accuracy of .845. Our model has a good AUC of .866. The AUC is still good, though our first model had the highest overall with an AUC of .881. Overall, our model does well to predict new data!</p>
+</div>
+<div id="done-thanks" class="section level2">
+<h2>DONE! THANKS!</h2>
 </div>
 
             

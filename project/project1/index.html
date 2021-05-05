@@ -7,7 +7,7 @@
     <meta name="author" content="Taylor Contreras" />
     
     <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
-    <title>Project 1</title>
+    <title>Project #1</title>
     <meta name="generator" content="Hugo 0.83.1" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="/css/main.css" />
@@ -54,13 +54,13 @@
       <div class="container">
         <div class="blog-post">
           <h3>
-            <strong><a href="/project/project1/">Project 1</a></strong>
+            <strong><a href="/project/project1/">Project #1</a></strong>
           </h3>
         </div>
  
 <div class="blog-title">
           <h4>
-         December 1, 2020 
+         January 1, 0001 
             &nbsp;&nbsp;
             
           </h4>
@@ -72,8 +72,229 @@
               
 
 
-<div id="test-project-1" class="section level2">
-<h2>Test Project 1</h2>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>In this project I will be looking at two datasets.</p>
+<p>I found these two datasets on a website listing R datasets (<a href="https://vincentarelbundock.github.io/Rdatasets/datasets.html" class="uri">https://vincentarelbundock.github.io/Rdatasets/datasets.html</a>). The first dataset looks at the number of teen pregnancies per 1000 girls in each U.S. state, the state’s role in the Civil War, and the percentage of the state who attended church in the previous week. The second dataset looks at each U.S. state, the expenditure per pupil in average daily attendance, the student to teacher ratio, the teacher salary, the percentage of all eligible student taking the SAT, the average verbal SAT score, the average math SAT score and the average overall SAT score.</p>
+<p>These two datasets interested me because I watch a lot of cheesy crime solving TV shows. Of the many epiodes of TV I have watched, I have seen many episodes about teen moms and young runaways. They often show these young parents as struggling and living in dangerous areas. I think teen pregnancies have a negative connotation in regards to young parents being able to complete an education. Many often feel once a teen becomes pregnant, they will drop out of school and lose “a bright future”.</p>
+<p>Therefore, I wanted to use these two datasets to see if there was any correlation between teen pregnancy and SAT scores. I am also interested to see if any of these variables have a relationship with the state’s role in the Civil War. I think it’s a wacky variable to include, so I’m interested to see the part it plays.</p>
+</div>
+<div id="the-data" class="section level2">
+<h2>The Data</h2>
+<pre class="r"><code>library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(cluster)
+
+teenPreg &lt;- read.csv(&quot;https://vincentarelbundock.github.io/Rdatasets/csv/Stat2Data/TeenPregnancy.csv&quot;)
+glimpse(teenPreg)</code></pre>
+<pre><code>## Rows: 50
+## Columns: 5
+## $ X        &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18…
+## $ State    &lt;fct&gt; AK, AL, AR, AZ, CA, CO, CT, DE, FL, GA, HI, IA, ID, IL, IN, K…
+## $ CivilWar &lt;fct&gt; O, C, C, O, U, O, U, U, C, C, O, U, O, U, U, U, B, C, U, U, U…
+## $ Church   &lt;int&gt; 26, 46, 45, 33, 28, 25, 25, 35, 32, 39, 25, 32, 34, 32, 35, 3…
+## $ Teen     &lt;int&gt; 64, 62, 73, 60, 59, 50, 44, 67, 60, 64, 65, 44, 47, 57, 53, 5…</code></pre>
+<pre class="r"><code>satData &lt;- read.csv(&quot;https://vincentarelbundock.github.io/Rdatasets/csv/mosaicData/SAT.csv&quot;)
+glimpse(satData)</code></pre>
+<pre><code>## Rows: 50
+## Columns: 9
+## $ X      &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, …
+## $ state  &lt;fct&gt; Alabama, Alaska, Arizona, Arkansas, California, Colorado, Conne…
+## $ expend &lt;dbl&gt; 4.405, 8.963, 4.778, 4.459, 4.992, 5.443, 8.817, 7.030, 5.718, …
+## $ ratio  &lt;dbl&gt; 17.2, 17.6, 19.3, 17.1, 24.0, 18.4, 14.4, 16.6, 19.1, 16.3, 17.…
+## $ salary &lt;dbl&gt; 31.144, 47.951, 32.175, 28.934, 41.078, 34.571, 50.045, 39.076,…
+## $ frac   &lt;int&gt; 8, 47, 27, 6, 45, 29, 81, 68, 48, 65, 57, 15, 13, 58, 5, 9, 11,…
+## $ verbal &lt;int&gt; 491, 445, 448, 482, 417, 462, 431, 429, 420, 406, 407, 468, 488…
+## $ math   &lt;int&gt; 538, 489, 496, 523, 485, 518, 477, 468, 469, 448, 482, 511, 560…
+## $ sat    &lt;int&gt; 1029, 934, 944, 1005, 902, 980, 908, 897, 889, 854, 889, 979, 1…</code></pre>
+</div>
+<div id="tidying-the-data" class="section level2">
+<h2>Tidying the Data</h2>
+<p>The first variable X in both the teenPreg dataset and satData dataset seemed unnecessary so I removed them. The data in the teenPreg dataset was already pretty tidy. I had to work to mutate the state variable in the satData dataset in order to be able to join the two sets by state. I had to rename the state’s to their respective abbreviations. Next, I renamed the column names in the teenPreg dataset so they were all lowercase (and then I could join the state variables).</p>
+<pre class="r"><code>teenPreg &lt;- teenPreg %&gt;% select(2:5)
+satData &lt;- satData %&gt;% select(2:9)
+
+satData &lt;- satData %&gt;% mutate(state = recode(state, Alabama = &quot;AL&quot;, Alaska = &quot;AK&quot;, Arizona = &quot;AZ&quot;, Arkansas = &quot;AR&quot;, California = &quot;CA&quot;, Colorado = &quot;CO&quot;, Connecticut = &quot;CT&quot;, Delaware = &quot;DE&quot;, Florida = &quot;FL&quot;, Georgia = &quot;GA&quot;, Hawaii = &quot;HI&quot;, Idaho = &quot;ID&quot;, Illinois = &quot;IL&quot;, Indiana = &quot;IN&quot;, Iowa = &quot;IA&quot;, Kansas = &quot;KS&quot;, Kentucky = &quot;KY&quot;, Louisiana = &quot;LA&quot;, Maine = &quot;ME&quot;, Maryland = &quot;MD&quot;, Massachusetts = &quot;MA&quot;, Michigan = &quot;MI&quot;, Minnesota = &quot;MN&quot;, Mississippi = &quot;MS&quot;, Missouri = &quot;MO&quot;, Montana = &quot;MT&quot;, Nebraska = &quot;NE&quot;, Nevada = &quot;NV&quot;, &quot;New Hampshire&quot; = &quot;NH&quot;, &quot;New Jersey&quot; = &quot;NJ&quot;, &quot;New Mexico&quot; = &quot;NM&quot;, &quot;New York&quot; = &quot;NY&quot;, &quot;North Carolina&quot; = &quot;NC&quot;, &quot;North Dakota&quot; = &quot;ND&quot;, Ohio = &quot;OH&quot;, Oklahoma = &quot;OK&quot;, Oregon = &quot;OR&quot;, Pennsylvania = &quot;PA&quot;, &quot;Rhode Island&quot; = &quot;RI&quot;, &quot;South Carolina&quot; = &quot;SC&quot;, &quot;South Dakota&quot; = &quot;SD&quot;, Tennessee = &quot;TN&quot;, Texas = &quot;TX&quot;, Utah = &quot;UT&quot;, Vermont = &quot;VT&quot;, Virginia = &quot;VA&quot;, Washington = &quot;WA&quot;, &quot;West Virginia&quot; = &quot;WV&quot;, Wisconsin = &quot;WI&quot;, Wyoming = &quot;WY&quot;))
+
+glimpse(satData)</code></pre>
+<pre><code>## Rows: 50
+## Columns: 8
+## $ state  &lt;fct&gt; AL, AK, AZ, AR, CA, CO, CT, DE, FL, GA, HI, ID, IL, IN, IA, KS,…
+## $ expend &lt;dbl&gt; 4.405, 8.963, 4.778, 4.459, 4.992, 5.443, 8.817, 7.030, 5.718, …
+## $ ratio  &lt;dbl&gt; 17.2, 17.6, 19.3, 17.1, 24.0, 18.4, 14.4, 16.6, 19.1, 16.3, 17.…
+## $ salary &lt;dbl&gt; 31.144, 47.951, 32.175, 28.934, 41.078, 34.571, 50.045, 39.076,…
+## $ frac   &lt;int&gt; 8, 47, 27, 6, 45, 29, 81, 68, 48, 65, 57, 15, 13, 58, 5, 9, 11,…
+## $ verbal &lt;int&gt; 491, 445, 448, 482, 417, 462, 431, 429, 420, 406, 407, 468, 488…
+## $ math   &lt;int&gt; 538, 489, 496, 523, 485, 518, 477, 468, 469, 448, 482, 511, 560…
+## $ sat    &lt;int&gt; 1029, 934, 944, 1005, 902, 980, 908, 897, 889, 854, 889, 979, 1…</code></pre>
+<pre class="r"><code>teenPreg &lt;- teenPreg %&gt;% rename(state = State)
+teenPreg &lt;- teenPreg %&gt;% rename(civilwar = CivilWar)
+teenPreg &lt;- teenPreg %&gt;% rename(church = Church)
+teenPreg &lt;- teenPreg %&gt;% rename(teen = Teen)
+
+glimpse(teenPreg)</code></pre>
+<pre><code>## Rows: 50
+## Columns: 4
+## $ state    &lt;fct&gt; AK, AL, AR, AZ, CA, CO, CT, DE, FL, GA, HI, IA, ID, IL, IN, K…
+## $ civilwar &lt;fct&gt; O, C, C, O, U, O, U, U, C, C, O, U, O, U, U, U, B, C, U, U, U…
+## $ church   &lt;int&gt; 26, 46, 45, 33, 28, 25, 25, 35, 32, 39, 25, 32, 34, 32, 35, 3…
+## $ teen     &lt;int&gt; 64, 62, 73, 60, 59, 50, 44, 67, 60, 64, 65, 44, 47, 57, 53, 5…</code></pre>
+<p>I looked at a the satData set in which the categories “verbal”, “math” and “sat” were all gathered into one variable. I then re-named the observation “sat” to “total sat” in order to show that that was the mean verbal score plus the mean math score.</p>
+<pre class="r"><code>satData2 &lt;- satData %&gt;% pivot_longer(6:8, names_to = &quot;type&quot;, values_to = &quot;score&quot;) %&gt;% mutate(type = recode(type, sat = &quot;total sat&quot;))
+glimpse(satData2)</code></pre>
+<pre><code>## Rows: 150
+## Columns: 7
+## $ state  &lt;fct&gt; AL, AL, AL, AK, AK, AK, AZ, AZ, AZ, AR, AR, AR, CA, CA, CA, CO,…
+## $ expend &lt;dbl&gt; 4.405, 4.405, 4.405, 8.963, 8.963, 8.963, 4.778, 4.778, 4.778, …
+## $ ratio  &lt;dbl&gt; 17.2, 17.2, 17.2, 17.6, 17.6, 17.6, 19.3, 19.3, 19.3, 17.1, 17.…
+## $ salary &lt;dbl&gt; 31.144, 31.144, 31.144, 47.951, 47.951, 47.951, 32.175, 32.175,…
+## $ frac   &lt;int&gt; 8, 8, 8, 47, 47, 47, 27, 27, 27, 6, 6, 6, 45, 45, 45, 29, 29, 2…
+## $ type   &lt;chr&gt; &quot;verbal&quot;, &quot;math&quot;, &quot;total sat&quot;, &quot;verbal&quot;, &quot;math&quot;, &quot;total sat&quot;, &quot;…
+## $ score  &lt;int&gt; 491, 538, 1029, 445, 489, 934, 448, 496, 944, 482, 523, 1005, 4…</code></pre>
+<p>However, I decided that I liked having each type of score as its own variable. Thus, I continue with the original dataset “satData”.</p>
+</div>
+<div id="joining-the-data" class="section level2">
+<h2>Joining the Data</h2>
+<p>I chose to do a full_join to join my datasets. I thought this join would be easiet because I wanted to connect these sets by state and keep the all the other variables. I had to first rename all the states in the satData set to their state’s abbreviataion. I then had to rename the actual column name from “State” to “state” in the teenPreg set in order for the join to take place (these steps are shown in the tidying section above). I named this dataset “fullData”. No observations were dropped.</p>
+<pre class="r"><code>fullData &lt;- teenPreg %&gt;% full_join(satData)
+fullData &lt;- fullData %&gt;% rename(&quot;total sat score&quot; = &quot;sat&quot;)
+glimpse(fullData)</code></pre>
+<pre><code>## Rows: 50
+## Columns: 11
+## $ state             &lt;fct&gt; AK, AL, AR, AZ, CA, CO, CT, DE, FL, GA, HI, IA, ID, …
+## $ civilwar          &lt;fct&gt; O, C, C, O, U, O, U, U, C, C, O, U, O, U, U, U, B, C…
+## $ church            &lt;int&gt; 26, 46, 45, 33, 28, 25, 25, 35, 32, 39, 25, 32, 34, …
+## $ teen              &lt;int&gt; 64, 62, 73, 60, 59, 50, 44, 67, 60, 64, 65, 44, 47, …
+## $ expend            &lt;dbl&gt; 8.963, 4.405, 4.459, 4.778, 4.992, 5.443, 8.817, 7.0…
+## $ ratio             &lt;dbl&gt; 17.6, 17.2, 17.1, 19.3, 24.0, 18.4, 14.4, 16.6, 19.1…
+## $ salary            &lt;dbl&gt; 47.951, 31.144, 28.934, 32.175, 41.078, 34.571, 50.0…
+## $ frac              &lt;int&gt; 47, 8, 6, 27, 45, 29, 81, 68, 48, 65, 57, 5, 15, 13,…
+## $ verbal            &lt;int&gt; 445, 491, 482, 448, 417, 462, 431, 429, 420, 406, 40…
+## $ math              &lt;int&gt; 489, 538, 523, 496, 485, 518, 477, 468, 469, 448, 48…
+## $ `total sat score` &lt;int&gt; 934, 1029, 1005, 944, 902, 980, 908, 897, 889, 854, …</code></pre>
+</div>
+<div id="wrangling" class="section level2">
+<h2>Wrangling</h2>
+<p>First, I will start by looking at all the distinct values in each variable, just to get an idea about each.</p>
+<pre class="r"><code>fullData %&gt;% summarize_all(n_distinct)</code></pre>
+<pre><code>##   state civilwar church teen expend ratio salary frac verbal math
+## 1    50        4     24   30     49    37     50   30     42   45
+##   total sat score
+## 1              48</code></pre>
+<p>Next, I will use summarize alone to compute basic summary statistics for some of my variables. I have 11 variables, I will focus on 10 of them, all of the variables except state.</p>
+<pre class="r"><code>fullData %&gt;% summarize(civilwar) %&gt;% table()</code></pre>
+<pre><code>## .
+##  B  C  O  U 
+##  3 11 15 21</code></pre>
+<p>This shows that 3 of the 50 states were Border states, 11 of the 50 were a part of the Confederacy, 15 of the 50 were classified as “Other”, and 21 of the 50 were a part of the Union.</p>
+<p>Let’s look at the mean percentage of those who attended church throughtout the US.</p>
+<pre class="r"><code>fullData %&gt;% summarise(mean(church))</code></pre>
+<pre><code>##   mean(church)
+## 1        32.62</code></pre>
+<p>It looks shows that, of all 50 states, the mean percetage of those who attended chruch was 32.62%</p>
+<p>Next, we can look at the mean number of pregnancies (per 1000 teenage girls) for all of the US.</p>
+<pre class="r"><code>fullData %&gt;% summarize(mean(teen))</code></pre>
+<pre><code>##   mean(teen)
+## 1       54.7</code></pre>
+<p>For the entiriety of the US, the average number of pregancies per 1000 girls is 54.7</p>
+<p>Next, we can look at the standard deviation for the expenditure per pupil in average daily attendance in public elementary and secondary schools (in thousands).</p>
+<pre class="r"><code>fullData %&gt;% summarize(sd(expend))</code></pre>
+<pre><code>##   sd(expend)
+## 1   1.362807</code></pre>
+<p>Let’s compute the IQR for the average pupil/teacher ratio in public elementary and secondary schools.</p>
+<pre class="r"><code>fullData %&gt;% summarize(IQR(ratio))</code></pre>
+<pre><code>##   IQR(ratio)
+## 1       2.35</code></pre>
+<p>Let’s find the maximum estimated average annual salary of teachers in public elementary and secondary schools (in thousands).</p>
+<pre class="r"><code>fullData %&gt;% summarise(max(salary))</code></pre>
+<pre><code>##   max(salary)
+## 1      50.045</code></pre>
+<p>Let’s find the minimum estimated average annual salary of teachers in public elementary and secondary schools (in thousands).</p>
+<pre class="r"><code>fullData %&gt;% summarize(min(salary))</code></pre>
+<pre><code>##   min(salary)
+## 1      25.994</code></pre>
+<p>We can look at the standard deviation of percentage of all eligible students taking the SAT.</p>
+<pre class="r"><code>fullData %&gt;% summarize(sd(frac))</code></pre>
+<pre><code>##   sd(frac)
+## 1 26.76242</code></pre>
+<p>Finally, for all 50 states, we can look at the mean verbal SAT score, the mean math SAT score and the mean total SAT score.</p>
+<pre class="r"><code>fullData %&gt;% summarize(mean(verbal), mean(math), mean(`total sat score`))</code></pre>
+<pre><code>##   mean(verbal) mean(math) mean(`total sat score`)
+## 1       457.14     508.78                  965.92</code></pre>
+<p>Now, I will compute some summary statistics using group_by.</p>
+<p>Let’s look at the mean SAT score based on the state’s role in the Civil War.</p>
+<pre class="r"><code>fullData %&gt;% group_by(civilwar) %&gt;% summarise(mean(`total sat score`))</code></pre>
+<pre><code>## # A tibble: 4 x 2
+##   civilwar `mean(\`total sat score\`)`
+##   &lt;fct&gt;                          &lt;dbl&gt;
+## 1 B                              1024.
+## 2 C                               943.
+## 3 O                               989.
+## 4 U                               953.</code></pre>
+<p>Next, we can look at the mean number of teenage pregnacies based on the state’s role in the Civil War.</p>
+<pre class="r"><code>fullData %&gt;% group_by(civilwar) %&gt;% summarize(mean(teen))</code></pre>
+<pre><code>## # A tibble: 4 x 2
+##   civilwar `mean(teen)`
+##   &lt;fct&gt;           &lt;dbl&gt;
+## 1 B                61.7
+## 2 C                64.6
+## 3 O                55.1
+## 4 U                48.2</code></pre>
+<p>Deciding which summary statistics to choose for each individual variable was a bit difficult. I wasn’t sure what to choose. Summarizing by group was my favorite. I think Civil War role is a wacky variable so I like that I got to choose how to use it and see the role it plays in the statistics.</p>
+<p>Computing some of these summary statistics provided some very interesting results. An interesting observation was looking at the minimum average annual salary for teachers compared to the maximum annual salary. The minimum was almost exactly half of the max. It was interesting to see such a stark difference. Finally, the summary statistics using group_by were, in my opinion, the most interesting. The mean SAT score for states who were a part of the Confederacy was the lowest of the four stats. Furthermore, states who were a part of the Confederacy had the highest mean number of teenage pregnacies. It makes me think about the state’s history and how this has played into sex education and education overall.</p>
+</div>
+<div id="visualizing" class="section level2">
+<h2>Visualizing</h2>
+<p>First, I will create a correlation heatmap of my numeric variables.</p>
+<pre class="r"><code>fullData %&gt;% select_if(is.numeric) %&gt;% cor %&gt;% as.data.frame %&gt;% rownames_to_column %&gt;% pivot_longer(-1) %&gt;% ggplot(aes(rowname, name, fill = value)) + geom_tile() + geom_text(aes(label = round(value, 2))) + xlab(&quot;&quot;) + ylab(&quot;&quot;) + ggtitle(&quot;Correlation Heatmap of Numeric Variables&quot;) + coord_fixed() + scale_fill_gradient2(low = &quot;purple&quot;, mid = &quot;white&quot;, high = &quot;blue&quot;) + theme(axis.text.x = element_text(angle = 45, hjust = 1))</code></pre>
+<p><img src="/project/project1_files/figure-html/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Looking at the heatmap we can see the variables correlated with themselves (correlation of 1). Some variables have a correlation of .99! This makes sense when looking at the variables: Total SAT Score and Verbal Score as well as Total SAT Score and Math SAT Score. Verbal Score and Math Score also have strong correlation with a correlation of .97! Another strong relationship can be seen between average annual salary of teachers and expenditure per pupil in average daily attendance. These two variables have a correlation of .87. Another cool observation is the 0 correlation between annual salary of teachers and average pupil/teacher ratio.</p>
+<p>Next, I will create a plot using geom_bar. This plot will look at the relationship between average math SAT score per state and average verbal SAT score per state. These bars will the be colored by average total SAT score for the state. A relationship is expected to be seen based on the correlation map.</p>
+<pre class="r"><code>ggplot(fullData, aes(x = math, y = verbal, color = `total sat score`)) + geom_bar(stat = &quot;summary&quot;, fun = mean) + scale_x_continuous(breaks = seq(440, 600, 20), limits = c(440,600)) + scale_y_continuous(breaks = seq(0, 550, 50), limits = c(0, 550)) + ggtitle(&quot;Avg Math and Avg Verbal SAT Score&quot;) + xlab(&quot;Avg Math SAT Score&quot;) + ylab(&quot;Avg Verbal SAT Score&quot;)</code></pre>
+<p><img src="/project/project1_files/figure-html/unnamed-chunk-18-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>This bar plot shows the relationship between average math SAT score and average verbal SAT score. These bars are colored by average total SAT score. This plot shows that there is a relationship between these two variables. As average math score increases, it seems that verbal score increases as well. This makes sense given the high correlation these two variables share. As both of these variables increase, the total score increases (shown through color), which is expected.</p>
+<p>Finally, I will look at a scatterplot showing total sat score as a function of teen pregnancies. These points will be colored by state’s role in the Civil War (B = border state, C = confederate state, O = other, U = union state). These points will then be connected by lines (by role in civil war).</p>
+<pre class="r"><code>ggplot(fullData, aes(`total sat score`, teen, color = civilwar)) + ggtitle(&quot;Teen Pregnancies and Sat Score&quot;) + ylab(&quot;# of pregnancies per 1000 teens&quot;) + xlab(&quot;Total SAT Score&quot;) + geom_point(size = 2) + scale_color_manual(&quot;Civil War&quot;, values = c(&quot;B&quot; = &quot;#999999&quot;, &quot;C&quot; = &quot;red&quot;, &quot;O&quot; = &quot;#E69F00&quot;, &quot;U&quot; = &quot;blue&quot;)) + geom_line(aes(group = civilwar))</code></pre>
+<p><img src="/project/project1_files/figure-html/unnamed-chunk-19-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>This scatter plot displayes the total SAT score as a function of the number of teen pregnancies per 1000 teens in each U.S. state. These points are colored by the state’s role in the Civil War. It’s hard to see any distinct pattern between SAT score and the number of teen pregnancies. One thing that does stand out to me is the red dots, the Confederate states, are located more towards the top of the graph. This shows that these states have a higher number of teen pregnancies. I thought this may be related to SAT score, but there does not seem to be any concrete evidence.</p>
+</div>
+<div id="dimensionality-reduction" class="section level2">
+<h2>Dimensionality Reduction</h2>
+<p>For the dimensionality reduction portion of this project, I chose to use PAM clustering. I started by creating a clust_dat dataset that contained all of my numeric variables.</p>
+<pre class="r"><code>clust_dat &lt;- fullData %&gt;% select(-1, -2)</code></pre>
+<p>I then had to choose the number of clusters to use.</p>
+<pre class="r"><code>pam1 &lt;- clust_dat %&gt;% pam(k = 2)
+pam1$silinfo$avg.width</code></pre>
+<pre><code>## [1] 0.6643154</code></pre>
+<pre class="r"><code>plot(pam1, which = 2)</code></pre>
+<p><img src="/project/project1_files/figure-html/unnamed-chunk-21-1.png" width="672" style="display: block; margin: auto;" />
+I ended up choosing 2 clusters because this resulted in the highest silhoutte width. The average silhouette width of .66 lets us know that a reasonable structure has been found.</p>
+<p>Next, I computed the means for all of my numeric variables. This allowed me to see how my variables were clustered.</p>
+<pre class="r"><code>pamclust&lt;-clust_dat%&gt;%mutate(cluster=as.factor(pam1$clustering))
+pamclust%&gt;%group_by(cluster)%&gt;%summarize_if(is.numeric,mean,na.rm=T)</code></pre>
+<pre><code>## # A tibble: 2 x 10
+##   cluster church  teen expend ratio salary  frac verbal  math `total sat score`
+##   &lt;fct&gt;    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;             &lt;dbl&gt;
+## 1 1         29.6  54.5   6.50  16.7   37.7  57.9   427.  475.              901.
+## 2 2         35.9  54.9   5.26  17.0   31.7  10.7   490.  546.             1036.</code></pre>
+<p>I then looked at the best projection of my nine-dimensional data in 2D.</p>
+<pre class="r"><code>plot(pam1, which = 1)</code></pre>
+<p><img src="/project/project1_files/figure-html/unnamed-chunk-23-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Next, I took my numeric variables and computed a correlation matrix. I then piped this into the eigen() function. Doing this allowed me to decompose the correlation matrix into eigenvectors.</p>
+<pre class="r"><code>eig1 &lt;- clust_dat %&gt;% cor %&gt;% eigen</code></pre>
+<p>I then multiplied the original variables by the coefficients to compute the PC scores for each observation. Finally, I made a scatterplot of these scores.</p>
+<pre class="r"><code>PCAscores &lt;- clust_dat %&gt;% scale() %*% eig1$vectors
+plot(PCAscores)</code></pre>
+<p><img src="/project/project1_files/figure-html/unnamed-chunk-25-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>I took that plot and made it nicer! I colored the points by the state’s role in the Civil War.</p>
+<pre class="r"><code>fullData %&gt;% mutate(PC1 = PCAscores[,1], PC2 = PCAscores[,2]) %&gt;% ggplot(aes(PC1,PC2, color = civilwar)) + geom_point()</code></pre>
+<p><img src="/project/project1_files/figure-html/unnamed-chunk-26-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Looking at the graph left me a little disappointed. I had hoped to see more distinct clusters. I expected the colored points to be somewhat more separated, but the graph looks like a big mix. I expected to see more distinction because the variability explained was, which I thought was high, with 74.5%. The only points that were near each other was the Border states, but there were only 3 observations of these states. Another observation I noticed concerned the Confederacy states in green. The points of these states tend to stay low on PC2.</p>
+<p>I think an observation that can be made is that the state’s role in the Civil War has not made a huge impact on the variables (church, teen, expend, etc.). This can seen as the points are not well-separated. While I noticed some differences in these variables earlier in the project, it seems that the difference was not significant enough. I think this could be a good thing, however. I think this shows that history isn’t leaving too much of a mark on these states and their futures!</p>
+</div>
+<div id="thanks" class="section level2">
+<h2>Thanks!</h2>
 </div>
 
             

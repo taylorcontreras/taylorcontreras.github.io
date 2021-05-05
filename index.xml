@@ -6,25 +6,7 @@
     <description>Recent content on Taylor Contreras</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
-    <lastBuildDate>Tue, 01 Dec 2020 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Project 1</title>
-      <link>/project/project1/</link>
-      <pubDate>Tue, 01 Dec 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/project/project1/</guid>
-      <description> Test Project 1  </description>
-    </item>
-    
-    <item>
-      <title>Project 2</title>
-      <link>/project/project2/</link>
-      <pubDate>Tue, 01 Dec 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/project/project2/</guid>
-      <description> Test Project 2  </description>
-    </item>
-    
+    <lastBuildDate>Thu, 23 Jul 2015 21:13:14 -0500</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Hello R Markdown</title>
       <link>/post/2015/07/23/hello-r-markdown/</link>
@@ -34,6 +16,25 @@
       <description>R Markdown This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see http://rmarkdown.rstudio.com.
 You can embed an R code chunk like this:
 summary(cars) ## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 26.00 ## Median :15.0 Median : 36.00 ## Mean :15.4 Mean : 42.98 ## 3rd Qu.</description>
+    </item>
+    
+    <item>
+      <title>Project #1</title>
+      <link>/project/project1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project1/</guid>
+      <description>Introduction In this project I will be looking at two datasets.
+I found these two datasets on a website listing R datasets (https://vincentarelbundock.github.io/Rdatasets/datasets.html). The first dataset looks at the number of teen pregnancies per 1000 girls in each U.S. state, the state’s role in the Civil War, and the percentage of the state who attended church in the previous week. The second dataset looks at each U.S. state, the expenditure per pupil in average daily attendance, the student to teacher ratio, the teacher salary, the percentage of all eligible student taking the SAT, the average verbal SAT score, the average math SAT score and the average overall SAT score.</description>
+    </item>
+    
+    <item>
+      <title>Project #2</title>
+      <link>/project/project2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project2/</guid>
+      <description>Introduction In this project I will be looking at some Extramarital affairs data. I found this data from the website listing various R datasets: https://vincentarelbundock.github.io/Rdatasets/datasets.html. My dataset includes the following variables: sex, age, number of years married, if there are children, a scale of how religious they are, education, economic statues according to Hollingshead’s classification, a rating of happiness on the marriage, and the number of affairs in the past year.</description>
     </item>
     
     <item>

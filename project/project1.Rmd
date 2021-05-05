@@ -1,8 +1,240 @@
 ---
-title: "Project 1"
-author: "Me"
-date: "2020-12-01"
+title: "Project #1"
+author: "Taylor Contreras tac3374"
+date: "April 4, 2021"
 output: html_document
 ---
 
-## Test Project 1
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = T, fig.align = "center", warning = F, message = F, tidy = T, tidy.opts=list(width.cutoff = 60), R.options=list(max.print = 100))
+```
+
+## Introduction
+
+In this project I will be looking at two datasets. 
+
+I found these two datasets on a website listing R datasets (https://vincentarelbundock.github.io/Rdatasets/datasets.html). The first dataset looks at the number of teen pregnancies per 1000 girls in each U.S. state, the state's role in the Civil War, and the percentage of the state who attended church in the previous week. The second dataset looks at each U.S. state, the expenditure per pupil in average daily attendance, the student to teacher ratio, the teacher salary, the percentage of all eligible student taking the SAT, the average verbal SAT score, the average math SAT score and the average overall SAT score. 
+
+These two datasets interested me because I watch a lot of cheesy crime solving TV shows. Of the many epiodes of TV I have watched, I have seen many episodes about teen moms and young runaways. They often show these young parents as struggling and living in dangerous areas. I think teen pregnancies have a negative connotation in regards to young parents being able to complete an education. Many often feel once a teen becomes pregnant, they will drop out of school and lose "a bright future".  
+
+Therefore, I wanted to use these two datasets to see if there was any correlation between teen pregnancy and SAT scores. I am also interested to see if any of these variables have a relationship with the state's role in the Civil War. I think it's a wacky variable to include, so I'm interested to see the part it plays. 
+
+## The Data
+
+```{R}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(cluster)
+
+teenPreg <- read.csv("https://vincentarelbundock.github.io/Rdatasets/csv/Stat2Data/TeenPregnancy.csv")
+glimpse(teenPreg)
+
+satData <- read.csv("https://vincentarelbundock.github.io/Rdatasets/csv/mosaicData/SAT.csv")
+glimpse(satData)
+```
+
+
+## Tidying the Data
+
+The first variable X in both the teenPreg dataset and satData dataset seemed unnecessary so I removed them. The data in the teenPreg dataset was already pretty tidy. I had to work to mutate the state variable in the satData dataset in order to be able to join the two sets by state. I had to rename the state's to their respective abbreviations. Next, I renamed the column names in the teenPreg dataset so they were all lowercase (and then I could join the state variables).
+
+```{R}
+teenPreg <- teenPreg %>% select(2:5)
+satData <- satData %>% select(2:9)
+
+satData <- satData %>% mutate(state = recode(state, Alabama = "AL", Alaska = "AK", Arizona = "AZ", Arkansas = "AR", California = "CA", Colorado = "CO", Connecticut = "CT", Delaware = "DE", Florida = "FL", Georgia = "GA", Hawaii = "HI", Idaho = "ID", Illinois = "IL", Indiana = "IN", Iowa = "IA", Kansas = "KS", Kentucky = "KY", Louisiana = "LA", Maine = "ME", Maryland = "MD", Massachusetts = "MA", Michigan = "MI", Minnesota = "MN", Mississippi = "MS", Missouri = "MO", Montana = "MT", Nebraska = "NE", Nevada = "NV", "New Hampshire" = "NH", "New Jersey" = "NJ", "New Mexico" = "NM", "New York" = "NY", "North Carolina" = "NC", "North Dakota" = "ND", Ohio = "OH", Oklahoma = "OK", Oregon = "OR", Pennsylvania = "PA", "Rhode Island" = "RI", "South Carolina" = "SC", "South Dakota" = "SD", Tennessee = "TN", Texas = "TX", Utah = "UT", Vermont = "VT", Virginia = "VA", Washington = "WA", "West Virginia" = "WV", Wisconsin = "WI", Wyoming = "WY"))
+
+glimpse(satData)
+
+teenPreg <- teenPreg %>% rename(state = State)
+teenPreg <- teenPreg %>% rename(civilwar = CivilWar)
+teenPreg <- teenPreg %>% rename(church = Church)
+teenPreg <- teenPreg %>% rename(teen = Teen)
+
+glimpse(teenPreg)
+```
+
+I looked at a the satData set in which the categories "verbal", "math" and "sat" were all gathered into one variable. I then re-named the observation "sat" to "total sat" in order to show that that was the mean verbal score plus the mean math score.
+
+```{R}
+satData2 <- satData %>% pivot_longer(6:8, names_to = "type", values_to = "score") %>% mutate(type = recode(type, sat = "total sat"))
+glimpse(satData2)
+```
+
+However, I decided that I liked having each type of score as its own variable. Thus, I continue with the original dataset "satData". 
+
+## Joining the Data
+
+I chose to do a full_join to join my datasets. I thought this join would be easiet because I wanted to connect these sets by state and keep the all the other variables. I had to first rename all the states in the satData set to their state's abbreviataion. I then had to rename the actual column name from "State" to "state" in the teenPreg set in order for the join to take place (these steps are shown in the tidying section above). I named this dataset "fullData". No observations were dropped. 
+
+```{R}
+fullData <- teenPreg %>% full_join(satData)
+fullData <- fullData %>% rename("total sat score" = "sat")
+glimpse(fullData)
+```
+
+
+## Wrangling
+
+First, I will start by looking at all the distinct values in each variable, just to get an idea about each. 
+
+```{R}
+fullData %>% summarize_all(n_distinct)
+```
+
+Next, I will use summarize alone to compute basic summary statistics for some of my variables. I have 11 variables, I will focus on 10 of them, all of the variables except state.  
+
+```{R}
+fullData %>% summarize(civilwar) %>% table()
+```
+This shows that 3 of the 50 states were Border states, 11 of the 50 were a part of the Confederacy, 15 of the 50 were classified as "Other", and 21 of the 50 were a part of the Union. 
+
+Let's look at the mean percentage of those who attended church throughtout the US.
+
+```{R}
+fullData %>% summarise(mean(church))
+```
+It looks shows that, of all 50 states, the mean percetage of those who attended chruch was 32.62%
+
+Next, we can look at the mean number of pregnancies (per 1000 teenage girls) for all of the US. 
+
+```{R}
+fullData %>% summarize(mean(teen))
+```
+For the entiriety of the US, the average number of pregancies per 1000 girls is 54.7 
+
+Next, we can look at the standard deviation for the expenditure per pupil in average daily attendance in public elementary and secondary schools (in thousands).
+
+```{R}
+fullData %>% summarize(sd(expend))
+```
+
+Let's compute the IQR for the average pupil/teacher ratio in public elementary and secondary schools.
+
+```{R}
+fullData %>% summarize(IQR(ratio))
+```
+
+Let's find the maximum estimated average annual salary of teachers in public elementary and secondary schools (in thousands). 
+
+```{R}
+fullData %>% summarise(max(salary))
+```
+
+Let's find the minimum estimated average annual salary of teachers in public elementary and secondary schools (in thousands).
+
+```{R}
+fullData %>% summarize(min(salary))
+```
+
+We can look at the standard deviation of percentage of all eligible students taking the SAT. 
+
+```{R}
+fullData %>% summarize(sd(frac))
+```
+
+Finally, for all 50 states, we can look at the mean verbal SAT score, the mean math SAT score and the mean total SAT score. 
+
+```{R}
+fullData %>% summarize(mean(verbal), mean(math), mean(`total sat score`))
+```
+
+Now, I will compute some summary statistics using group_by. 
+
+Let's look at the mean SAT score based on the state's role in the Civil War.
+
+```{R}
+fullData %>% group_by(civilwar) %>% summarise(mean(`total sat score`))
+```
+
+Next, we can look at the mean number of teenage pregnacies based on the state's role in the Civil War.
+
+```{R}
+fullData %>% group_by(civilwar) %>% summarize(mean(teen))
+```
+
+Deciding which summary statistics to choose for each individual variable was a bit difficult. I wasn't sure what to choose. Summarizing by group was my favorite. I think Civil War role is a wacky variable so I like that I got to choose how to use it and see the role it plays in the statistics. 
+
+Computing some of these summary statistics provided some very interesting results. An interesting observation was looking at the minimum average annual salary for teachers compared to the maximum annual salary. The minimum was almost exactly half of the max. It was interesting to see such a stark difference. Finally, the summary statistics using group_by were, in my opinion, the most interesting. The mean SAT score for states who were a part of the Confederacy was the lowest of the four stats. Furthermore, states who were a part of the Confederacy had the highest mean number of teenage pregnacies. It makes me think about the state's history and how this has played into sex education and education overall. 
+
+## Visualizing
+
+First, I will create a correlation heatmap of my numeric variables. 
+
+```{R}
+fullData %>% select_if(is.numeric) %>% cor %>% as.data.frame %>% rownames_to_column %>% pivot_longer(-1) %>% ggplot(aes(rowname, name, fill = value)) + geom_tile() + geom_text(aes(label = round(value, 2))) + xlab("") + ylab("") + ggtitle("Correlation Heatmap of Numeric Variables") + coord_fixed() + scale_fill_gradient2(low = "purple", mid = "white", high = "blue") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Looking at the heatmap we can see the variables correlated with themselves (correlation of 1). Some variables have a correlation of .99! This makes sense when looking at the variables: Total SAT Score and Verbal Score as well as Total SAT Score and Math SAT Score. Verbal Score and Math Score also have strong correlation with a correlation of .97! Another strong relationship can be seen between average annual salary of teachers and expenditure per pupil in average daily attendance. These two variables have a correlation of .87. Another cool observation is the 0 correlation between annual salary of teachers and average pupil/teacher ratio. 
+
+Next, I will create a plot using geom_bar. This plot will look at the relationship between average math SAT score per state and average verbal SAT score per state. These bars will the be colored by average total SAT score for the state. A relationship is expected to be seen based on the correlation map.  
+
+```{R}
+ggplot(fullData, aes(x = math, y = verbal, color = `total sat score`)) + geom_bar(stat = "summary", fun = mean) + scale_x_continuous(breaks = seq(440, 600, 20), limits = c(440,600)) + scale_y_continuous(breaks = seq(0, 550, 50), limits = c(0, 550)) + ggtitle("Avg Math and Avg Verbal SAT Score") + xlab("Avg Math SAT Score") + ylab("Avg Verbal SAT Score")
+```
+
+This bar plot shows the relationship between average math SAT score and average verbal SAT score. These bars are colored by average total SAT score. This plot shows that there is a relationship between these two variables. As average math score increases, it seems that verbal score increases as well. This makes sense given the high correlation these two variables share. As both of these variables increase, the total score increases (shown through color), which is expected.  
+
+Finally, I will look at a scatterplot showing total sat score as a function of teen pregnancies. These points will be colored by state's role in the Civil War (B = border state, C = confederate state, O = other, U = union state). These points will then be connected by lines (by role in civil war). 
+
+```{R}
+ggplot(fullData, aes(`total sat score`, teen, color = civilwar)) + ggtitle("Teen Pregnancies and Sat Score") + ylab("# of pregnancies per 1000 teens") + xlab("Total SAT Score") + geom_point(size = 2) + scale_color_manual("Civil War", values = c("B" = "#999999", "C" = "red", "O" = "#E69F00", "U" = "blue")) + geom_line(aes(group = civilwar))
+```
+
+This scatter plot displayes the total SAT score as a function of the number of teen pregnancies per 1000 teens in each U.S. state. These points are colored by the state's role in the Civil War. It's hard to see any distinct pattern between SAT score and the number of teen pregnancies. One thing that does stand out to me is the red dots, the Confederate states, are located more towards the top of the graph. This shows that these states have a higher number of teen pregnancies. I thought this may be related to SAT score, but there does not seem to be any concrete evidence. 
+
+## Dimensionality Reduction
+
+For the dimensionality reduction portion of this project, I chose to use PAM clustering. I started by creating a clust_dat dataset that contained all of my numeric variables. 
+
+```{R}
+clust_dat <- fullData %>% select(-1, -2)
+```
+
+I then had to choose the number of clusters to use.
+
+```{R}
+pam1 <- clust_dat %>% pam(k = 2)
+pam1$silinfo$avg.width
+plot(pam1, which = 2)
+```
+I ended up choosing 2 clusters because this resulted in the highest silhoutte width. The average silhouette width of .66 lets us know that a reasonable structure has been found.
+
+Next, I computed the means for all of my numeric variables. This allowed me to see how my variables were clustered.
+
+```{R}
+pamclust<-clust_dat%>%mutate(cluster=as.factor(pam1$clustering))
+pamclust%>%group_by(cluster)%>%summarize_if(is.numeric,mean,na.rm=T)
+```
+
+I then looked at the best projection of my nine-dimensional data in 2D. 
+
+```{R}
+plot(pam1, which = 1)
+```
+
+Next, I took my numeric variables and computed a correlation matrix. I then piped this into the eigen() function. Doing this allowed me to decompose the correlation matrix into eigenvectors.
+
+```{R}
+eig1 <- clust_dat %>% cor %>% eigen
+```
+
+I then multiplied the original variables by the coefficients to compute the PC scores for each observation. Finally, I made a scatterplot of these scores.
+
+```{R}
+PCAscores <- clust_dat %>% scale() %*% eig1$vectors
+plot(PCAscores)
+```
+
+I took that plot and made it nicer! I colored the points by the state's role in the Civil War.
+
+```{R}
+fullData %>% mutate(PC1 = PCAscores[,1], PC2 = PCAscores[,2]) %>% ggplot(aes(PC1,PC2, color = civilwar)) + geom_point()
+```
+
+Looking at the graph left me a little disappointed. I had hoped to see more distinct clusters. I expected the colored points to be somewhat more separated, but the graph looks like a big mix. I expected to see more distinction because the variability explained was, which I thought was high, with 74.5%. The only points that were near each other was the Border states, but there were only 3 observations of these states. Another observation I noticed concerned the Confederacy states in green. The points of these states tend to stay low on PC2. 
+
+I think an observation that can be made is that the state's role in the Civil War has not made a huge impact on the variables (church, teen, expend, etc.). This can seen as the points are not well-separated. While I noticed some differences in these variables earlier in the project, it seems that the difference was not significant enough. I think this could be a good thing, however. I think this shows that history isn't leaving too much of a mark on these states and their futures! 
+
+## Thanks!
