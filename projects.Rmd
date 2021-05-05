@@ -6,7 +6,7 @@ hiderelated: true
 hidediscus: true
 ---
 
-Check out some of my coding projects below:
+Check out some of my R coding projects below:
 
 
 <i class="fa fa-signal"></i> &nbsp; [Wrangling & Exploratory Data Analysis](/project/project1/)
