@@ -57,14 +57,6 @@
             <strong><a href="/project/project2/">Project #2</a></strong>
           </h3>
         </div>
- 
-<div class="blog-title">
-          <h4>
-         January 1, 0001 
-            &nbsp;&nbsp;
-            
-          </h4>
-        </div>
 
         <div class="panel panel-default">
           <div class="panel-body">
@@ -210,7 +202,7 @@ for (i in 1:5000){
   rand_dist[i] &lt;- mean(new[new$gender == &quot;females&quot;,]$number_affairs) - mean(new[new$gender == &quot;males&quot;,]$number_affairs)}
 
 mean(rand_dist &gt; .0775 | rand_dist &lt; -.0775)</code></pre>
-<pre><code>## [1] 0.763</code></pre>
+<pre><code>## [1] 0.7604</code></pre>
 <pre class="r"><code>{hist(rand_dist, main = &quot;&quot;, ylab = &quot;&quot;, col = &quot;light grey&quot;); abline(v = c(-.0775, .0775), col = &quot;red&quot;)}</code></pre>
 <p><img src="/project/project2_files/figure-html/unnamed-chunk-6-2.png" width="672" style="display: block; margin: auto;" /></p>
 <p>The mean difference we compute is .0075. This gives us a p-value of .763. We fail to reject our null hypothesis and cannot conlcude that the number of affairs differs between men and women.</p>
@@ -296,8 +288,8 @@ summary(model2)</code></pre>
   fit &lt;- lm(ym ~ child * age_c, data = boot_dat)
   coef(fit)})
 samp_distn %&gt;% t %&gt;% as.data.frame %&gt;% summarize_all(sd)</code></pre>
-<pre><code>##   (Intercept)  childyes      age_c childyes:age_c
-## 1   0.4334387 0.4616688 0.04737978     0.05003453</code></pre>
+<pre><code>##   (Intercept)  childyes     age_c childyes:age_c
+## 1   0.4329259 0.4603536 0.0470751     0.04982627</code></pre>
 <p>The bootstrapped standard errors are very similar to the robust standard errors, both of which are all greater than the original standard errors.</p>
 </div>
 <div id="logistic-regression-two-variables" class="section level2">
@@ -452,32 +444,11 @@ summarize_all(diags, mean)</code></pre>
 </div>
 
             
-        <hr>         <div class="related-posts">
-                <h5>Related Posts</h5>
-                
-              </div> 
+
             </div>
           </div>
 
-   <hr>  <div class="disqus">
-  <div id="disqus_thread"></div>
-  <script type="text/javascript">
 
-    (function() {
-      
-      
-      if (window.location.hostname == "localhost")
-        return;
-
-      var disqus_shortname = '';
-      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-  </script>
-  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-</div> 
         </div>
       </div>
     </div>

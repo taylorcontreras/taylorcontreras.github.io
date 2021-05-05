@@ -3,6 +3,9 @@ title: "Project #1"
 author: "Taylor Contreras tac3374"
 date: "April 4, 2021"
 output: html_document
+hidedate: true
+hiderelated: true
+hidediscus: true
 ---
 
 ```{r setup, include=FALSE}
