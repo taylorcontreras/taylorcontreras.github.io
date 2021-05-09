@@ -6,7 +6,17 @@
     <description>Recent content in Posts on Taylor Contreras</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
-    <lastBuildDate>Wed, 05 May 2021 00:00:00 +0000</lastBuildDate><atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 08 May 2021 00:00:00 +0000</lastBuildDate><atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Python Talk</title>
+      <link>/post/2021/05/08/python/</link>
+      <pubDate>Sat, 08 May 2021 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2021/05/08/python/</guid>
+      <description>Imagine using an R markdown file to run Python code. Well, I am! The reticulate package includes a Python engine that allows for conversation between R and Python code chunks. The two languages are super similar and have full access to each others objects. Python chunks work exactly like chunks of R code! The code is executed, the output is printed and then included within the document.
+Pandas is an extremely useful package in the world of data.</description>
+    </item>
+    
     <item>
       <title>Book Talk</title>
       <link>/post/2021/05/05/book-talk/</link>
@@ -14,16 +24,6 @@
       
       <guid>/post/2021/05/05/book-talk/</guid>
       <description>Like nearly everyone on the planet, I had a New Year’s resolution. I wanted to read more books. I have loved reading for as long as I can remember. Yet, I think the last time I had really read more than the books assigned for school was my sophomore year of high school. I got busy applying for college and getting jobs. It didn’t bother me until I was trapped at home every day.</description>
-    </item>
-    
-    <item>
-      <title>Python Talk</title>
-      <link>/post/2021/05/05/python/</link>
-      <pubDate>Wed, 05 May 2021 00:00:00 +0000</pubDate>
-      
-      <guid>/post/2021/05/05/python/</guid>
-      <description>Imagine using an R markdown file to run Python code. Well, I am! The reticulate package includes a Python engine that allows for conversation between R and Python code chunks. The two languages are super similar and have full access to each others objects. Python chunks work exactly like chunks of R code! The code is executed, the output is printed and then included within the document.
-Pandas is an extremely useful package in the world of data.</description>
     </item>
     
   </channel>
