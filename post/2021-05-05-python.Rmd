@@ -9,7 +9,8 @@ description: ''
 ---
 Imagine using an R markdown file to run Python code. Well, I am! The reticulate package includes a Python engine that allows for conversation between R and Python code chunks. The two languages are super similar and have full access to each others objects. Python chunks work exactly like chunks of R code! The code is executed, the output is printed and then included within the document. 
 
-Pandas is an extremely useful package in the world of data. ![](/post/2021-05-05-python_files/Screen Shot 2021-05-08 at 9.49.13 PM.png)
+Pandas is an extremely useful package in the world of data. 
+![](/post/2021-05-05-python_files/panda.png)
 Not that kind of panda! The python package Pandas!
 
 Often, real-world data is messy, unorganized and difficult to work with. Pandas works to tidy the data, making it easy to manipulate and analyze. This package allows for gather columns to rows, rows to columns, appending columns/rows to dataframes, order rows by values and so much more! 
