@@ -26,3 +26,5 @@ affairs.melt(value_vars = ["sex", "age","ym", "child", "religious", "education",
 ```
 
 Thus, we can easily select the variables we actually need/want to observe! The melt() function pivots the dataframe, making it go from a wide format to a long format.
+
+Pandas can do so much more, but this is a nice preview! 
