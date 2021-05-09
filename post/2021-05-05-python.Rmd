@@ -1,5 +1,5 @@
 ---
-title: 'Python '
+title: 'Python Talk'
 author: Taylor Contreras
 date: '2021-05-05'
 slug: python
@@ -8,3 +8,9 @@ tags: []
 description: ''
 ---
 I talk about Python here. 
+
+```{python}
+import pandas as pd
+affairs = pd.read_csv("https://vincentarelbundock.github.io/Rdatasets/csv/Ecdat/Fair.csv")
+
+```
