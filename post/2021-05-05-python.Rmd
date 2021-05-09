@@ -23,3 +23,5 @@ affairs = pd.read_csv("https://vincentarelbundock.github.io/Rdatasets/csv/Ecdat/
 affairs.head()
 affairs[["sex", "age","ym", "child", "religious", "education", "rate", "nbaffairs"]].head()
 ```
+
+Thus, we can easily select the variables we actually need/want to observe!
