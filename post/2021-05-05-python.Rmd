@@ -15,13 +15,14 @@ Not that kind of panda! The python package Pandas!
 
 Often, real-world data is messy, unorganized and difficult to work with. Pandas works to tidy the data, making it easy to manipulate and analyze. This package allows the user to gather columns to rows, rows to columns, appending columns/rows to dataframes, order rows by values and so much more! 
 
-To demonstrate my python knowledge, I will be tidying the same dataset used in my Project #2 but with Python. 
+To demonstrate my python knowledge, I will be tidying the same dataset used in my Project #2.. 
 
 ```{python}
 import pandas as pd
 affairs = pd.read_csv("https://vincentarelbundock.github.io/Rdatasets/csv/Ecdat/Fair.csv")
 affairs.head()
 affairs[["sex", "age","ym", "child", "religious", "education", "rate", "nbaffairs"]].head()
+affairs.melt(value_vars = ["sex", "age","ym", "child", "religious", "education", "rate", "nbaffairs"])
 ```
 
-Thus, we can easily select the variables we actually need/want to observe!
+Thus, we can easily select the variables we actually need/want to observe! The melt() function pivots the dataframe, making it go from a wide format to a long format.

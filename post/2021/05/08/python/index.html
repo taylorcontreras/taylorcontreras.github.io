@@ -77,7 +77,7 @@
 <img src="/post/2021-05-05-python_files/panda.png" />
 Not that kind of panda! The python package Pandas!</p>
 <p>Often, real-world data is messy, unorganized and difficult to work with. Pandas works to tidy the data, making it easy to manipulate and analyze. This package allows the user to gather columns to rows, rows to columns, appending columns/rows to dataframes, order rows by values and so much more!</p>
-<p>To demonstrate my python knowledge, I will be tidying the same dataset used in my Project #2 but with Python.</p>
+<p>To demonstrate my python knowledge, I will be tidying the same dataset used in my Project #2..</p>
 <pre class="python"><code>import pandas as pd
 affairs = pd.read_csv(&quot;https://vincentarelbundock.github.io/Rdatasets/csv/Ecdat/Fair.csv&quot;)
 affairs.head()</code></pre>
@@ -96,7 +96,22 @@ affairs.head()</code></pre>
 ## 2  female  32.0  15.00   yes          1         12     4          0
 ## 3    male  57.0  15.00   yes          5         18     5          0
 ## 4    male  22.0   0.75    no          2         17     3          0</code></pre>
-<p>Thus, we can easily select the variables we actually need/want to observe!</p>
+<pre class="python"><code>affairs.melt(value_vars = [&quot;sex&quot;, &quot;age&quot;,&quot;ym&quot;, &quot;child&quot;, &quot;religious&quot;, &quot;education&quot;, &quot;rate&quot;, &quot;nbaffairs&quot;])</code></pre>
+<pre><code>##        variable   value
+## 0           sex    male
+## 1           sex  female
+## 2           sex  female
+## 3           sex    male
+## 4           sex    male
+## ...         ...     ...
+## 4803  nbaffairs       1
+## 4804  nbaffairs       7
+## 4805  nbaffairs       2
+## 4806  nbaffairs       2
+## 4807  nbaffairs       1
+## 
+## [4808 rows x 2 columns]</code></pre>
+<p>Thus, we can easily select the variables we actually need/want to observe! The melt() function pivots the dataframe, making it go from a wide format to a long format.</p>
 
             
         <hr>         <div class="related-posts">
