@@ -12,7 +12,7 @@ Imagine using an R markdown file to run Python code. Well, I am! The reticulate 
 Pandas is an extremely useful package in the world of data. ![](/post/2021-05-05-python_files/Screen Shot 2021-05-08 at 9.49.13 PM.png)
 Not that kind of panda! The python package Pandas!
 
-Often, real-world data is messy, unorganized and difficult to work with. Pandas works to tidy the data, making it easy to manipulate and analyze. This package allows for gather columns to rows, rows to columns, appending columns/rows to dataframes, order rows by values and so much more! Pandas is very similar to the dplyr package in R!![](/post/2021-05-05-python_files/Screen Shot 2021-05-08 at 9.55.30 PM.png)
+Often, real-world data is messy, unorganized and difficult to work with. Pandas works to tidy the data, making it easy to manipulate and analyze. This package allows for gather columns to rows, rows to columns, appending columns/rows to dataframes, order rows by values and so much more! 
 
 To demonstrate my python knowledge, I will be tidying the same dataset used in my Project #2 but with Python. 
 
