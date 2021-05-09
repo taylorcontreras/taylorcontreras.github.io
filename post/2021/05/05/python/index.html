@@ -72,9 +72,22 @@
               
 
 
-<p>I talk about Python here.</p>
+<p>Imagine using an R markdown file to run Python code. Well, I am! The reticulate package includes a Python engine that allows for conversation between R and Python code chunks. The two languages are super similar and have full access to each others objects. Python chunks work exactly like chunks of R code! The code is executed, the output is printed and then included within the document.</p>
+<p>Pandas is an extremely useful package in the world of data. <img src="/post/2021-05-05-python_files/Screen%20Shot%202021-05-08%20at%209.49.13%20PM.png" />
+Not that kind of panda! The python package Pandas!</p>
+<p>Often, real-world data is messy, unorganized and difficult to work with. Pandas works to tidy the data, making it easy to manipulate and analyze. This package allows for gather columns to rows, rows to columns, appending columns/rows to dataframes, order rows by values and so much more!</p>
+<p>To demonstrate my python knowledge, I will be tidying the same dataset used in my Project #2 but with Python.</p>
 <pre class="python"><code>import pandas as pd
-affairs = pd.read_csv(&quot;https://vincentarelbundock.github.io/Rdatasets/csv/Ecdat/Fair.csv&quot;)</code></pre>
+affairs = pd.read_csv(&quot;https://vincentarelbundock.github.io/Rdatasets/csv/Ecdat/Fair.csv&quot;)
+affairs.head()</code></pre>
+<pre><code>##    Unnamed: 0     sex   age     ym  ... education  occupation  rate  nbaffairs
+## 0           1    male  37.0  10.00  ...        18           7     4          0
+## 1           2  female  27.0   4.00  ...        14           6     4          0
+## 2           3  female  32.0  15.00  ...        12           1     4          0
+## 3           4    male  57.0  15.00  ...        18           6     5          0
+## 4           5    male  22.0   0.75  ...        17           6     3          0
+## 
+## [5 rows x 10 columns]</code></pre>
 
             
         <hr>         <div class="related-posts">

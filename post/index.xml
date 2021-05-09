@@ -22,8 +22,8 @@
       <pubDate>Wed, 05 May 2021 00:00:00 +0000</pubDate>
       
       <guid>/post/2021/05/05/python/</guid>
-      <description> I talk about Python here.
-import pandas as pd affairs = pd.read_csv(&amp;quot;https://vincentarelbundock.github.io/Rdatasets/csv/Ecdat/Fair.csv&amp;quot;) </description>
+      <description>Imagine using an R markdown file to run Python code. Well, I am! The reticulate package includes a Python engine that allows for conversation between R and Python code chunks. The two languages are super similar and have full access to each others objects. Python chunks work exactly like chunks of R code! The code is executed, the output is printed and then included within the document.
+Pandas is an extremely useful package in the world of data.</description>
     </item>
     
   </channel>
